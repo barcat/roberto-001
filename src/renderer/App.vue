@@ -6,8 +6,8 @@
 
 <script>
   export default {
-    name: '001'
-  }
+    name: 'app',
+  };
 </script>
 
 <style>
