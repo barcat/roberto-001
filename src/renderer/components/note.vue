@@ -1,8 +1,9 @@
 <template>
   <div :style="style" class="note">
-    <textarea v-show="isFocused" ref="txt">
+    <textarea v-show="isFocused" ref="txt" v-model="value">
     </textarea>
     <div class="value" v-show="!isFocused">
+      {{ content }}
     </div>
   </div>
 </template>
@@ -11,21 +12,33 @@ export default {
   props: [
     'range',
     'isFocused',
+    'content',
   ],
   data() {
     return {
-      content: '',
+      toWrite: null,
     };
   },
   watch: {
     isFocused() {
-      console.log('focus');
       this.$nextTick(() => this.$refs.txt.focus());
-      // this.$refs.txt.scrollIntoView();
-      // console.log(this.$refs.txt);
     },
+    // toWrite() {
+    //   this.$store.state.selectedNote.value = this.toWrite;
+    //   console.log(this.toWrite);
+    // },
   },
   computed: {
+    value: {
+      get() {
+        return this.content;
+      },
+      set(x) {
+        console.log(this);
+        this.$store.state.selectedNote.value = x;
+        // this.toWrite = x;
+      },
+    },
     style() {
       return {
         gridRowStart: this.range.gridRowStart,

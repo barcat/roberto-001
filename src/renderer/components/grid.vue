@@ -1,7 +1,7 @@
 <template>
   <div class="container" :style="style">
     <app-cell v-for="(c, key) in container.cells" :key="key" :id="c.id" :row="c.range.gridRowStart" :col="c.range.gridColumnStart"></app-cell>
-    <app-note v-for="(n, key) in container.notes" :key="key" :id="n.id" :range="n.range" :isFocused="n.isFocused"></app-note>
+    <app-note v-for="(n, key) in container.notes" :key="key" :id="n.id" :range="n.range" :isFocused="n.isFocused" :content="n.value"></app-note>
     <div id="expand" v-show="container.selectedRange !== null" :style="selectedRange"> </div>
   </div>
 </template>
@@ -67,25 +67,33 @@ export default {
     window.addEventListener('keydown', (event) => {
       this.updateStore();
       const keyCode = event.keyCode;
+
+      // pres esc
+      if (keyCode === 27) {
+        if (this.$store.state.selectedNote !== null) {
+          this.$store.state.selectedNote.isFocused = false;
+        } else {
+          console.log(1);
+          this.container.clearSelection();
+        }
+      }
+
+      if (this.$store.state.selectedNote !== null) {
+        if (this.$store.state.selectedNote.isFocused === true) return null;
+      }
+
+
       if ([40, 39, 38, 37].indexOf(keyCode) > -1) {
         if (expandDownMap[16] === false) {
           this.container.selectCells(keyCode);
         }
       }
-      if (keyCode === 27) {
-        if (this.$store.selectedNote !== null) {
-          this.$store.selectedNote.isFocused = false;
-        } else {
-          this.container.clearSelection();
-        }
-      }
 
       // press enter
       if (keyCode === 13) {
-        if (this.$store.selectedNote !== null) {
-          this.$store.selectedNote.isFocused = true;
+        if (this.$store.state.selectedNote !== null) {
+          this.$store.state.selectedNote.isFocused = true;
         }
-        console.log(this.$store.selectedNote);
       }
       // add new note
       if ([17, 65].indexOf(keyCode) > -1) {
@@ -110,6 +118,7 @@ export default {
               });
             }
           }
+          this.container.selectedRange = null;
         }
       }
       if ([16, 40].indexOf(keyCode) > -1) {
@@ -142,6 +151,7 @@ export default {
           this.container.deleteNote();
         }
       }
+      return null;
     });
 
     window.addEventListener('keyup', (event) => {
@@ -180,10 +190,11 @@ export default {
   methods: {
     updateStore() {
       if (this.container.selectedNoteId !== null) {
-        this.$store.selectedNote = this.container.notes
+        console.log(3, this);
+        this.$store.state.selectedNote = this.container.notes
           .find(x => x.id === this.container.selectedNoteId);
       } else {
-        this.$store.selectedNote = null;
+        this.$store.state.selectedNote = null;
       }
     },
   },
