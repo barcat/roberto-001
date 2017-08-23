@@ -104,6 +104,7 @@ export default {
               if (this.container.IfCellsAreLinked(this.container.selectedCell.range) === false) {
                 const noteToAdd = new Note(this.container.selectedCell.range);
                 this.container.linkCellsWithNote(noteToAdd.id, noteToAdd.range);
+                this.unselectCell();
                 this.container.notes.push(noteToAdd);
               }
             } else if (this.container.IfCellsAreLinked(this.container.selectedRange) === false) {
@@ -111,7 +112,7 @@ export default {
               this.container.selectedNoteId = noteToAdd.id;
               this.container.linkCellsWithNote(noteToAdd.id, noteToAdd.range);
               this.container.notes.push(noteToAdd);
-
+              this.unselectCell();
               this.$nextTick(() => {
                 const el = document.getElementById(this.container.selectedNoteId);
                 el.classList.add('selected');
@@ -190,12 +191,16 @@ export default {
   methods: {
     updateStore() {
       if (this.container.selectedNoteId !== null) {
-        console.log(3, this);
         this.$store.state.selectedNote = this.container.notes
           .find(x => x.id === this.container.selectedNoteId);
       } else {
         this.$store.state.selectedNote = null;
       }
+    },
+    unselectCell() {
+      const el = document.getElementById(this.container.selectedCell.id);
+      console.log(el);
+      el.classList.remove('selected');
     },
   },
   components: {

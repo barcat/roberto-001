@@ -2,9 +2,7 @@
   <div :style="style" class="note">
     <textarea v-show="isFocused" ref="txt" v-model="value">
     </textarea>
-    <div class="value" v-show="!isFocused">
-      {{ content }}
-    </div>
+    <div class="value" v-show="!isFocused">{{ content }}</div>
   </div>
 </template>
 <script>
@@ -23,10 +21,6 @@ export default {
     isFocused() {
       this.$nextTick(() => this.$refs.txt.focus());
     },
-    // toWrite() {
-    //   this.$store.state.selectedNote.value = this.toWrite;
-    //   console.log(this.toWrite);
-    // },
   },
   computed: {
     value: {
@@ -34,9 +28,7 @@ export default {
         return this.content;
       },
       set(x) {
-        console.log(this);
         this.$store.state.selectedNote.value = x;
-        // this.toWrite = x;
       },
     },
     style() {
@@ -75,5 +67,11 @@ textarea {
 .content {
   width: 100%;
   height: 100%;
+}
+
+.value {
+  white-space: pre;
+  line-height: 24px;
+  font-size: 16px;
 }
 </style>
