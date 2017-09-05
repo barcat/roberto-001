@@ -11,6 +11,7 @@ export default {
     'range',
     'isFocused',
     'content',
+    //'id',
   ],
   data() {
     return {

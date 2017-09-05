@@ -1,7 +1,9 @@
 import R from 'ramda';
+import guid from 'guid';
 
 export default class GridContainer {
   constructor(numberOfRows, numberOfColumns, width, lineHeight) {
+    this.id = guid.raw();
     this.numberOfRows = numberOfRows;
     this.numberOfColumns = numberOfColumns;
     this.width = width;

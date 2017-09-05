@@ -7,6 +7,7 @@
 </template>
 <script>
 
+import Datastore from 'nedb';
 import cell from './cell';
 import note from './note';
 import GridContainer from '../model/gridContainer';
@@ -36,9 +37,11 @@ export default {
     return {
       container: null,
       selectedCellId: null,
+      db: null,
     };
   },
   created() {
+    this.db = new Datastore({ filename: 'db/containers', autoload: true });
     this.container = new GridContainer(
       this.numberOfRows,
       this.numberOfColumns,
@@ -71,9 +74,11 @@ export default {
       // pres esc
       if (keyCode === 27) {
         if (this.$store.state.selectedNote !== null) {
+          if (this.$store.state.selectedNote.isFocused === true) {
+            this.updateNoteDB(this.$store.state.selectedNote);
+          }
           this.$store.state.selectedNote.isFocused = false;
         } else {
-          console.log(1);
           this.container.clearSelection();
         }
       }
@@ -102,13 +107,14 @@ export default {
           if (this.container.selectedCell !== null) {
             if (this.container.selectedRange === null) {
               if (this.container.IfCellsAreLinked(this.container.selectedCell.range) === false) {
-                const noteToAdd = new Note(this.container.selectedCell.range);
+                const noteToAdd = new Note(this.container.selectedCell.range, this.container.id);
                 this.container.linkCellsWithNote(noteToAdd.id, noteToAdd.range);
                 this.unselectCell();
                 this.container.notes.push(noteToAdd);
+                this.addNoteDB(noteToAdd);
               }
             } else if (this.container.IfCellsAreLinked(this.container.selectedRange) === false) {
-              const noteToAdd = new Note(this.container.selectedRange);
+              const noteToAdd = new Note(this.container.selectedRange, this.container.id);
               this.container.selectedNoteId = noteToAdd.id;
               this.container.linkCellsWithNote(noteToAdd.id, noteToAdd.range);
               this.container.notes.push(noteToAdd);
@@ -117,6 +123,7 @@ export default {
                 const el = document.getElementById(this.container.selectedNoteId);
                 el.classList.add('selected');
               });
+              this.addNoteDB(noteToAdd);
             }
           }
           this.container.selectedRange = null;
@@ -149,6 +156,7 @@ export default {
       if ([17, 68].indexOf(keyCode) > -1) {
         deleteCell[keyCode] = true;
         if (deleteCell[17] && deleteCell[68]) {
+          this.deleteNoteDB();
           this.container.deleteNote();
         }
       }
@@ -199,8 +207,22 @@ export default {
     },
     unselectCell() {
       const el = document.getElementById(this.container.selectedCell.id);
-      console.log(el);
       el.classList.remove('selected');
+    },
+    addNoteDB(doc) {
+      this.db.insert(doc, (err) => {
+        if (err) throw err;
+      });
+    },
+    deleteNoteDB() {
+      this.db.remove({ id: this.$store.state.selectedNote.id }, {}, (err) => {
+        if (err) throw err;
+      });
+    },
+    updateNoteDB(doc) {
+      this.db.update({ id: this.$store.state.selectedNote.id }, doc, {}, (err) => {
+        throw err;
+      });
     },
   },
   components: {
